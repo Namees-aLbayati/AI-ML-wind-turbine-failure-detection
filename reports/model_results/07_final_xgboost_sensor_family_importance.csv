@@ -1,0 +1,25 @@
+source_sensor_family,importance,rank,cumulative_importance
+Drivetrain vibration,0.6845224,1,0.6845224
+Tower vibration,0.14148676,2,0.82600915
+FFT vibration signals,0.066410914,3,0.89242005
+Yaw misalignment,0.05047821,4,0.9428983
+Oil particle count,0.012744012,5,0.9556423
+Wind direction,0.007795753,6,0.96343803
+Generator temperature,0.0075572073,7,0.97099525
+Main-bearing temperature,0.0071111443,8,0.9781064
+Gearbox temperature,0.006598838,9,0.9847052
+Oil pressure,0.0051895194,10,0.98989475
+Drivetrain speed,0.0018840097,11,0.99177873
+Power output,0.0015760201,12,0.99335474
+Gearbox Oil Temp C,0.0011573511,13,0.9945121
+Generator Bearing Temp C,0.0010570735,14,0.99556917
+Ambient Temp C,0.0010052854,15,0.99657446
+Turbulence Intensity,0.00065595715,16,0.9972304
+Humidity Pct,0.00058705534,17,0.99781746
+Air Density Kgm3,0.00056654244,18,0.998384
+Nacelle Temp C,0.0005642796,19,0.9989483
+Wind Speed Mps,0.00052646763,20,0.99947476
+Blade Pitch Angle Deg,0.00052521325,21,1.0
+Rated power,0.0,22,1.0
+High Pitch State,0.0,23,1.0
+Below Cutin,0.0,24,1.0

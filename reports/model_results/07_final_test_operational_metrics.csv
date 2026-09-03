@@ -1,0 +1,2 @@
+failure_episodes,detected_episodes,episode_recall,false_positives,turbine_days,false_positive_records_per_turbine_day
+65.0,60.0,0.9230769230769231,679.0,135.0,5.029629629629629

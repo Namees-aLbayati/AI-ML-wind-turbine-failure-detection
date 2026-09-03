@@ -1,0 +1,25 @@
+# Data and generated artifacts
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+models/*
+!models/.gitkeep
+
+# Row-level evaluation outputs containing turbine IDs and timestamps
+reports/model_results/07_final_test_predictions.csv
+reports/model_results/07_final_test_episode_results.csv
+
+# Notebook and Python caches
+.ipynb_checkpoints/
+__pycache__/
+*.py[cod]
+
+# Local environments and secrets
+.venv/
+.env
+
+# OS and editor files
+.DS_Store
+.vscode/
+.idea/

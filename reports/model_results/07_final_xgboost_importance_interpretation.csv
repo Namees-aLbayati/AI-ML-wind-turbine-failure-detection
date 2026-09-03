@@ -1,0 +1,91 @@
+feature,importance,rank,cumulative_importance,feature_type,source_sensor_family
+drivetrain_vibration_rms_mmps_past_3h_mean,0.47583184,1,0.47583184,Engineered,Drivetrain vibration
+drivetrain_vibration_rms_mmps_past_1h_mean,0.1670349,2,0.64286673,Engineered,Drivetrain vibration
+tower_vibration_mmps,0.14148676,3,0.7843535,Original,Tower vibration
+yaw_misalignment_cos,0.048407424,4,0.83276093,Engineered,Yaw misalignment
+drivetrain_vibration_rms_mmps,0.026773833,5,0.85953474,Original,Drivetrain vibration
+vib_fft_gearmesh,0.02264666,6,0.8821814,Original,FFT vibration signals
+gearmesh_sideband_ratio,0.013760823,7,0.8959422,Engineered,FFT vibration signals
+drivetrain_vibration_rms_mmps_lag1,0.010791754,8,0.906734,Engineered,Drivetrain vibration
+vib_fft_bearing_bpfi,0.0060488423,9,0.91278285,Original,FFT vibration signals
+bearing_fft_sum,0.0055058347,10,0.9182887,Engineered,FFT vibration signals
+vib_fft_bearing_bpfo,0.0054512457,11,0.92373997,Original,FFT vibration signals
+vib_fft_sideband,0.0051860744,12,0.92892605,Original,FFT vibration signals
+wind_direction_cos,0.004042837,13,0.9329689,Engineered,Wind direction
+oil_particle_count_past_3h_mean,0.003962515,14,0.93693143,Engineered,Oil particle count
+fft_spread,0.0034702648,15,0.9404017,Engineered,FFT vibration signals
+oil_particle_count_past_1h_mean,0.0026288754,16,0.94303054,Engineered,Oil particle count
+fft_max,0.0022951446,17,0.9453257,Engineered,FFT vibration signals
+wind_direction_deg,0.0022052762,18,0.9475309,Original,Wind direction
+vibration_per_rotor_rpm,0.002125413,19,0.94965637,Engineered,Drivetrain vibration
+fft_mean,0.0020460216,20,0.9517024,Engineered,FFT vibration signals
+oil_particles_per_pressure,0.0019916845,21,0.9536941,Engineered,Oil particle count
+main_bearing_temp_rise,0.0016671662,22,0.95536125,Engineered,Main-bearing temperature
+wind_direction_sin,0.00154764,23,0.9569089,Engineered,Wind direction
+generator_winding_temp_C_past_1h_std,0.0013657843,24,0.95827466,Engineered,Generator temperature
+oil_particle_count,0.0013393654,25,0.95961404,Original,Oil particle count
+oil_particle_count_lag1,0.0012900955,26,0.9609041,Engineered,Oil particle count
+gearbox_bearing_temp_C_lag1,0.0012615293,27,0.96216565,Engineered,Gearbox temperature
+gearbox_oil_temp_C,0.0011573511,28,0.963323,Original,Gearbox Oil Temp C
+oil_pressure_bar_past_3h_mean,0.0011323844,29,0.96445537,Engineered,Oil pressure
+generator_winding_temp_C_past_1h_mean,0.0011126332,30,0.965568,Engineered,Generator temperature
+generator_winding_temp_C_past_3h_mean,0.0010778768,31,0.9666459,Engineered,Generator temperature
+capacity_factor,0.0010630876,32,0.967709,Engineered,Power output
+generator_bearing_temp_C,0.0010570735,33,0.9687661,Original,Generator Bearing Temp C
+main_bearing_temp_C_past_1h_std,0.0010332281,34,0.96979934,Engineered,Main-bearing temperature
+generator_winding_temp_C_past_3h_std,0.0010327374,35,0.97083205,Engineered,Generator temperature
+ambient_temp_C,0.0010052854,36,0.97183734,Original,Ambient Temp C
+gearbox_bearing_temp_C_past_3h_mean,0.0009835945,37,0.97282094,Engineered,Gearbox temperature
+oil_pressure_bar_past_1h_mean,0.0009600445,38,0.973781,Engineered,Oil pressure
+main_bearing_temp_C_past_1h_mean,0.00095049344,39,0.9747315,Engineered,Main-bearing temperature
+drivetrain_vibration_rms_mmps_past_3h_std,0.00093468116,40,0.97566617,Engineered,Drivetrain vibration
+oil_particle_count_past_3h_std,0.00092765637,41,0.9765938,Engineered,Oil particle count
+main_bearing_temp_C_past_3h_std,0.0009240845,42,0.9775179,Engineered,Main-bearing temperature
+absolute_yaw_misalignment,0.00091899297,43,0.9784369,Engineered,Yaw misalignment
+main_bearing_temp_C_lag1,0.0008618141,44,0.9792987,Engineered,Main-bearing temperature
+generator_winding_temp_C,0.0008451745,45,0.9801439,Original,Generator temperature
+generator_speed_rpm,0.0007943521,46,0.98093826,Original,Drivetrain speed
+gearbox_bearing_temp_C_past_1h_std,0.0007630202,47,0.98170125,Engineered,Gearbox temperature
+gearbox_bearing_temp_C_past_1h_mean,0.000736916,48,0.98243815,Engineered,Gearbox temperature
+gearbox_bearing_temp_C_past_3h_std,0.00069947215,49,0.9831376,Engineered,Gearbox temperature
+oil_pressure_bar,0.0006908608,50,0.9838285,Original,Oil pressure
+oil_pressure_bar_past_1h_std,0.0006832498,51,0.98451173,Engineered,Oil pressure
+oil_pressure_bar_past_3h_std,0.0006617951,52,0.9851735,Engineered,Oil pressure
+turbulence_intensity,0.00065595715,53,0.9858295,Original,Turbulence Intensity
+generator_winding_temp_C_lag1,0.0006496461,54,0.9864791,Engineered,Generator temperature
+main_bearing_temp_C_past_3h_mean,0.0006401271,55,0.98711926,Engineered,Main-bearing temperature
+yaw_misalignment_deg,0.0006391776,56,0.98775846,Original,Yaw misalignment
+gearbox_nacelle_temp_gap,0.00061747676,57,0.98837596,Engineered,Gearbox temperature
+oil_particle_count_past_1h_std,0.00060382055,58,0.98897976,Engineered,Oil particle count
+gearbox_bearing_temp_C_delta1,0.0006010368,59,0.9895808,Engineered,Gearbox temperature
+oil_pressure_bar_lag1,0.0006001819,60,0.99018097,Engineered,Oil pressure
+gearbox_bearing_temp_C,0.00059181784,61,0.9907728,Original,Gearbox temperature
+drivetrain_vibration_rms_mmps_past_1h_std,0.00058823085,62,0.991361,Engineered,Drivetrain vibration
+humidity_pct,0.00058705534,63,0.99194807,Original,Humidity Pct
+winding_bearing_temp_gap,0.00057596806,64,0.992524,Engineered,Generator temperature
+main_bearing_temp_C,0.0005709557,65,0.993095,Original,Main-bearing temperature
+rotor_speed_rpm,0.0005676449,66,0.99366266,Original,Drivetrain speed
+air_density_kgm3,0.00056654244,67,0.9942292,Original,Air Density Kgm3
+nacelle_temp_C,0.0005642796,68,0.9947935,Original,Nacelle Temp C
+generator_winding_temp_rise,0.0005381381,69,0.9953316,Engineered,Generator temperature
+wind_speed_mps,0.00052646763,70,0.9958581,Original,Wind Speed Mps
+blade_pitch_angle_deg,0.00052521325,71,0.9963833,Original,Blade Pitch Angle Deg
+generator_rotor_ratio,0.00052201276,72,0.9969053,Engineered,Drivetrain speed
+power_output_kW,0.0005129325,73,0.9974183,Original,Power output
+yaw_misalignment_sin,0.000512613,74,0.9979309,Engineered,Yaw misalignment
+main_bearing_temp_C_delta1,0.0004632751,75,0.99839413,Engineered,Main-bearing temperature
+oil_pressure_bar_delta1,0.0004610027,76,0.9988551,Engineered,Oil pressure
+drivetrain_vibration_rms_mmps_delta1,0.00044173258,77,0.99929684,Engineered,Drivetrain vibration
+generator_winding_temp_C_delta1,0.000359249,78,0.9996561,Engineered,Generator temperature
+gearbox_temp_rise,0.00034397462,79,1.0,Engineered,Gearbox temperature
+rated_power_kW_3000,0.0,80,1.0,Original,Rated power
+rated_power_kW_1500,0.0,81,1.0,Original,Rated power
+rated_power_kW_2300,0.0,82,1.0,Original,Rated power
+rated_power_kW_2000,0.0,83,1.0,Original,Rated power
+below_cutin,0.0,84,1.0,Engineered,Below Cutin
+oil_particle_count_delta1,0.0,85,1.0,Engineered,Oil particle count
+high_pitch_state,0.0,86,1.0,Engineered,High Pitch State
+near_rated_operation,0.0,87,1.0,Engineered,Power output
+positive_power,0.0,88,1.0,Engineered,Power output
+rotor_stopped,0.0,89,1.0,Engineered,Drivetrain speed
+rated_power_kW_3600,0.0,90,1.0,Original,Rated power
