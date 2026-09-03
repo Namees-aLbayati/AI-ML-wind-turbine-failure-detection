@@ -1,5 +1,7 @@
 # Predictive Modeling with Machine Learning and Neural Networks: Wind Turbine Failure Detection
 
+**Live case-study report:** [View the GitHub Pages report](https://namees-albayati.github.io/wind-turbine-failure-detection/)
+
 ## Business Context
 
 Aeolus Renewables operates onshore wind turbines under long-term power purchase agreements, making reliable electricity delivery important to revenue. Gearbox and main-bearing failures are operationally significant because they can cause extended outages, emergency repair costs, and additional drivetrain damage. Earlier identification of credible fault conditions could help reduce unplanned downtime and support better maintenance decisions.

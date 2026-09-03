@@ -61,6 +61,8 @@ def build_final_report(project_root: Path) -> Path:
     results_dir = project_root / "reports" / "model_results"
     figures_dir = project_root / "reports" / "figures"
     report_path = project_root / "reports" / "Wind_Turbine_Failure_Detection_Report.html"
+    pages_dir = project_root / "docs"
+    pages_path = pages_dir / "index.html"
 
     required = [
         results_dir / "05_baseline_metrics.csv",
@@ -202,4 +204,7 @@ figure {{margin:25px 0}} figure img {{max-width:100%;display:block;margin:auto}}
 </main></body></html>"""
 
     report_path.write_text(document, encoding="utf-8")
+    pages_dir.mkdir(parents=True, exist_ok=True)
+    pages_path.write_text(document, encoding="utf-8")
+    (pages_dir / ".nojekyll").touch()
     return report_path
