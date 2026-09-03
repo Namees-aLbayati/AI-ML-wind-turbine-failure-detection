@@ -110,7 +110,8 @@ def build_final_report(project_root: Path) -> Path:
     split_metadata = {name: pd.read_csv(data_dir / f"03_{name}_metadata.csv") for name in ["train", "validation", "test"]}
 
     eda_figure = figures_dir / "08_report_eda_summary.png"
-    _create_eda_summary(raw, eda_figure)
+    if not eda_figure.exists():
+        _create_eda_summary(raw, eda_figure)
 
     baseline_table = _format_table(
         baseline,
@@ -173,20 +174,25 @@ figure {{margin:25px 0}} figure img {{max-width:100%;display:block;margin:auto}}
 @media print {{body {{background:white}} main {{box-shadow:none;margin:0;max-width:none}}}}
 </style></head><body><main id="top">
 <header class="hero"><h1>Wind Turbine Failure Detection</h1><div class="subtitle">Predictive Modeling with Machine Learning and Neural Networks</div><div class="meta"><span class="badge">Final Case Study Report</span><span class="badge">15 Turbines</span><span class="badge">131,760 SCADA Records</span><span class="badge">Recall-First Classification</span></div></header>
-<nav class="toc"><strong>Report navigation — select a section to jump directly to it</strong><div class="toc-links"><a href="#executive">Executive summary</a><a href="#business">Business objective</a><a href="#eda">Exploratory analysis</a><a href="#preprocessing">Preprocessing</a><a href="#features">Feature engineering</a><a href="#baseline">Baseline models</a><a href="#tuning">Tuning</a><a href="#performance">Final performance</a><a href="#importance">Feature importance</a><a href="#recommendations">Recommendations</a><a href="#limitations">Limitations</a><a href="#rubric">Rubric coverage</a><a href="#conclusion">Conclusion</a></div></nav>
+<nav class="toc"><strong>Template-aligned report navigation — select a section to jump directly to it</strong><div class="toc-links"><a href="#problem">Problem statement</a><a href="#business">Business context</a><a href="#objective">Objective</a><a href="#dictionary">Data dictionary</a><a href="#reproducibility">Libraries &amp; loading</a><a href="#overview">Data overview</a><a href="#eda">Exploratory data analysis</a><a href="#preprocessing">Data preprocessing</a><a href="#baseline">Model building</a><a href="#tuning">Hyperparameter tuning</a><a href="#selection">Final model selection</a><a href="#importance">Feature importance</a><a href="#performance">Final test performance</a><a href="#recommendations">Business insights &amp; recommendations</a><a href="#limitations">Limitations</a><a href="#rubric">Rubric coverage</a><a href="#conclusion">Conclusion</a></div></nav>
 
 <section class="executive" id="executive"><h2 style="margin-top:0">Executive Summary</h2>
 <p>A recall-first XGBoost classifier was developed to identify current drivetrain-fault conditions from 10-minute SCADA records. The final pipeline was selected without using the test period and then evaluated once on later unseen-in-time records.</p>
 <div class="metrics"><div class="metric"><strong>{final['recall']:.3f}</strong>Test recall</div><div class="metric"><strong>{final['precision']:.3f}</strong>Precision</div><div class="metric"><strong>{final['f1']:.3f}</strong>F1</div><div class="metric"><strong>{final['pr_auc']:.3f}</strong>PR-AUC</div><div class="metric"><strong>{operational['episode_recall']:.3f}</strong>Episode recall</div></div>
 <p>The model detected {int(operational['detected_episodes'])} of {int(operational['failure_episodes'])} test failure episodes. Its dominant information source was {top_family.lower()}, especially sustained one- and three-hour behavior. Results support analyst triage and inspection prioritization, not autonomous shutdown decisions.</p></section>
 
-<h2 id="business">1. Business Problem and Objective</h2>
-<p>Aeolus Renewables requires reliable electricity delivery under long-term power purchase agreements. Gearbox and main-bearing faults can contribute to extended outages, emergency repair costs, and additional drivetrain damage. This proof of concept classifies each SCADA record as normal (<code>failure=0</code>) or indicative of a current drivetrain fault (<code>failure=1</code>).</p>
-<p>Failure recall is the primary criterion because a false negative is a real fault the model misses. Precision, F1, PR-AUC, ROC-AUC, alert burden, and episode recall are retained so recall is not optimized without regard to operational usability.</p>
+<h2 id="problem">1. Problem Statement</h2>
+<p>This project develops a proof-of-concept binary classifier that predicts <code>failure</code> from 10-minute SCADA sensor records collected from 15 wind turbines. A value of 0 represents a normal drivetrain condition and 1 represents a detected drivetrain fault.</p>
 
-<h2 id="eda">2. Data Overview and Exploratory Analysis</h2>
-<p>The source contains {len(raw):,} records, {raw.shape[1]} columns, and {raw['turbine_id'].nunique()} turbines at a verified 10-minute cadence. It spans 1 January through 1 March 2024. The target contains {int(raw['failure'].sum()):,} failure records ({raw['failure'].mean()*100:.3f}%). Missingness is limited to gearbox-oil temperature, generator-bearing temperature, and oil pressure, each affecting approximately 0.5% of rows.</p>
-<h3>2.1 Key fields</h3>
+<h2 id="business">2. Business Context</h2>
+<p>Aeolus Renewables requires reliable electricity delivery under long-term power purchase agreements. Gearbox and main-bearing faults can contribute to extended outages, emergency repair costs, and additional drivetrain damage. Earlier identification of credible fault conditions can support maintenance prioritization and reduce exposure to secondary drivetrain damage.</p>
+<div class="callout warning"><strong>Context boundary:</strong> fleet size, installed capacity, downtime, and cost figures supplied in the project brief are assumptions, not empirical findings calculated from the CSV.</div>
+
+<h2 id="objective">3. Objective</h2>
+<p>Build and validate a classification workflow that helps operations analysts triage current drivetrain risk and helps maintenance planners prioritize inspections. Failure recall is the primary criterion because a false negative is a real fault the model misses. Precision, F1, PR-AUC, ROC-AUC, alert burden, and episode recall are retained so recall is not optimized without regard to operational usability.</p>
+
+<h2 id="dictionary">4. Data Dictionary</h2>
+<p>The source contains identifiers, operating and environmental measurements, thermal and mechanical condition signals, lubrication indicators, maintenance-history fields, and the binary target. The complete column-level dictionary is documented in the full-code notebook; the analytical groups are summarized below.</p>
 <table class="report-table"><thead><tr><th>Field group</th><th>Important fields</th><th>Analytical role</th></tr></thead><tbody>
 <tr><td>Identifiers</td><td><code>timestamp</code>, <code>turbine_id</code></td><td>Chronological splitting, turbine-grouped histories, and traceability; excluded from predictors.</td></tr>
 <tr><td>Target</td><td><code>failure</code></td><td>Binary outcome: 0 normal, 1 detected drivetrain fault.</td></tr>
@@ -196,7 +202,15 @@ figure {{margin:25px 0}} figure img {{max-width:100%;display:block;margin:auto}}
 <tr><td>Mechanical condition</td><td>Drivetrain/tower vibration and four FFT bands</td><td>Mechanical and frequency-domain condition signals.</td></tr>
 <tr><td>Lubrication</td><td>Oil-particle count and oil pressure</td><td>Lubrication and wear indicators.</td></tr>
 </tbody></table>
-<h3>2.2 Data quality</h3>
+
+<h2 id="reproducibility">5. Installing and Importing the Necessary Libraries</h2>
+<p>The reproducible environment is defined in <code>requirements.txt</code>. The workflow uses pandas and NumPy for data handling, Matplotlib and Seaborn for visualization, scikit-learn for preprocessing and four classifier families including the multilayer-perceptron ANN, and XGBoost for gradient-boosted trees. Install with <code>pip install -r requirements.txt</code>.</p>
+<h3 id="loading">Loading the Data</h3>
+<p>The single source of truth is <code>data/raw/wind_turbine_detection.csv</code>. The executed workflow loads this file programmatically, parses <code>timestamp</code>, validates turbine-time keys, and generates all downstream artifacts without manually entered model results.</p>
+
+<h2 id="overview">6. Data Overview</h2>
+<p>The source contains {len(raw):,} records, {raw.shape[1]} columns, and {raw['turbine_id'].nunique()} turbines at a verified 10-minute cadence. It spans 1 January through 1 March 2024. The target contains {int(raw['failure'].sum()):,} failure records ({raw['failure'].mean()*100:.3f}%). Missingness is limited to gearbox-oil temperature, generator-bearing temperature, and oil pressure, each affecting approximately 0.5% of rows.</p>
+<h3>Data quality</h3>
 <table class="report-table"><thead><tr><th>Check</th><th>Result</th><th>Decision</th></tr></thead><tbody>
 <tr><td>Cadence and keys</td><td>Complete 10-minute cadence; no duplicate turbine/timestamp keys</td><td>Retain all structurally valid rows.</td></tr>
 <tr><td>Missing values</td><td>Gearbox-oil temperature: 645; generator-bearing temperature: 690; oil pressure: 636</td><td>Median imputation fitted within training pipelines.</td></tr>
@@ -204,13 +218,16 @@ figure {{margin:25px 0}} figure img {{max-width:100%;display:block;margin:auto}}
 <tr><td>Distributional outliers</td><td>Several temperature and vibration extremes were failure-enriched</td><td>Retain; these may contain genuine fault information.</td></tr>
 <tr><td>Class balance</td><td>127,807 normal and 3,953 failure records</td><td>Use imbalance-aware training and PR-sensitive evaluation.</td></tr>
 </tbody></table>
-<h3>2.3 Univariate analysis</h3><p>The target is highly imbalanced at 3.000% failures. Strong skew appeared in turbulence intensity, generator-winding temperature, vibration/FFT fields, oil-particle count, oil pressure, power output, and blade pitch. Structural zeros in power and rotational speed were treated as operating states rather than missing observations.</p>
-<h3>2.4 Bivariate analysis</h3><p>Failure rates varied from 0.968% to 6.352% across turbines. Compared with normal rows, failure rows had higher mean gearbox-bearing temperature (70.249 versus 62.480°C), drivetrain vibration (3.407 versus 1.786 mm/s), bearing BPFO amplitude (0.859 versus 0.422), and oil-particle count (158.083 versus 71.118).</p>
-<h3>2.5 Multivariate analysis</h3><p>Rotor and generator speed were almost perfectly correlated (<em>r</em>=0.99984), and multiple thermal variables exceeded |<em>r</em>|=0.90. Joint temperature, vibration, FFT, and oil-condition patterns motivated multivariate tree models and feature-family interpretation. Trends across the six longest episodes were not directionally consistent enough to justify a single global lead-time slope.</p>
+
+<h2 id="eda">7. Exploratory Data Analysis</h2>
+<h3>Univariate Analysis</h3><p>The target is highly imbalanced at 3.000% failures. Strong skew appeared in turbulence intensity, generator-winding temperature, vibration/FFT fields, oil-particle count, oil pressure, power output, and blade pitch. Structural zeros in power and rotational speed were treated as operating states rather than missing observations.</p>
+<h3>Bivariate Analysis</h3><p>Failure rates varied from 0.968% to 6.352% across turbines. Compared with normal rows, failure rows had higher mean gearbox-bearing temperature (70.249 versus 62.480°C), drivetrain vibration (3.407 versus 1.786 mm/s), bearing BPFO amplitude (0.859 versus 0.422), and oil-particle count (158.083 versus 71.118).</p>
+<h3>Multivariate Analysis</h3><p>Rotor and generator speed were almost perfectly correlated (<em>r</em>=0.99984), and multiple thermal variables exceeded |<em>r</em>|=0.90. Joint temperature, vibration, FFT, and oil-condition patterns motivated multivariate tree models and feature-family interpretation. Trends across the six longest episodes were not directionally consistent enough to justify a single global lead-time slope.</p>
 <figure><img src="{images['eda']}" alt="Exploratory data summary"><figcaption>Univariate target balance, bivariate turbine and vibration comparisons, and a multivariate correlation overview.</figcaption></figure>
 <div class="callout warning"><strong>EDA interpretation:</strong> Failure records formed 219 per-turbine episodes. Observed relationships identify useful predictive associations but do not establish physical causation.</div>
 
-<h2 id="preprocessing">3. Data Preprocessing and Leakage Controls</h2>
+<h2 id="preprocessing">8. Data Preprocessing</h2>
+<h3>Splitting the Data into Train, Validation, and Test Sets</h3>
 <div class="flow"><div>Raw SCADA audit</div><div>Chronological split</div><div>Past-only engineering</div><div>Train-fitted pipelines</div></div>
 <p>A shared chronological split placed {split_rows['train']:,} rows in training, {split_rows['validation']:,} in validation, and {split_rows['test']:,} in the final test period. All 15 turbines appear in every period, every row occurs exactly once, and failure episodes were not divided at the boundaries.</p>
 <table class="report-table"><thead><tr><th>Partition</th><th>Rows</th><th>Failures</th><th>Failure rate</th></tr></thead><tbody>
@@ -218,7 +235,7 @@ figure {{margin:25px 0}} figure img {{max-width:100%;display:block;margin:auto}}
 <p>Imputation, encoding, scaling, model fitting, and imbalance treatment were learned from training data within pipelines. Median imputation was chosen because missingness was low and it is robust to skew and extremes; observed zeros were preserved. <code>rated_power_kW</code> was one-hot encoded, and ANN numeric inputs were standardized. Balanced class/sample weights were derived from training labels; SMOTE was avoided because interpolation could dilute meaningful fault extremes and disregard temporal structure.</p>
 <p>Six provenance-risk maintenance/history fields—prior fault count, hours since maintenance, component age, cumulative operating hours, cumulative energy, and load cycles—were conservatively excluded. The rising failure prevalence across time is a material distribution shift and is considered when interpreting generalization.</p>
 
-<h2 id="features">4. Feature Engineering</h2>
+<h3 id="features">Feature Engineering</h3>
 <p>Step 04 created 24 domain-informed snapshot features and 36 past-only temporal features. These include safe operating ratios, component temperature rises, FFT summaries, circular direction encodings, lagged measurements, recent changes, and one- and three-hour rolling statistics calculated independently per turbine. No centered or future-looking windows were used.</p>
 <p>A training/validation ablation selected {len(selected_features)} predictors combining original measurements with engineered features. The test set was not scored during this selection.</p>
 <table class="report-table"><thead><tr><th>Feature group</th><th>Examples</th><th>Rationale</th></tr></thead><tbody>
@@ -229,28 +246,26 @@ figure {{margin:25px 0}} figure img {{max-width:100%;display:block;margin:auto}}
 <tr><td>Past-only dynamics</td><td>Lag, change, 1-hour and 3-hour rolling statistics</td><td>Capture persistence and recent change without using future observations.</td></tr>
 </tbody></table>
 
-<h2 id="baseline">5. Baseline Model Building</h2>
+<h2 id="baseline">9. Model Building</h2>
+<h3>Model Evaluation Criterion</h3>
+<p>Failure-class recall is the primary model-selection measure because missed genuine faults carry the greatest operational risk. Precision, F1, PR-AUC, ROC-AUC, classification reports, and confusion matrices provide complementary evidence.</p>
+<h3>Baseline Models</h3>
 <p>Five assignment-required classifiers were fitted on the full training period at a fixed 0.50 threshold. XGBoost produced the strongest baseline recall and PR-AUC. Random Forest showed strong probability ranking but conservative classifications, motivating tuning and threshold analysis.</p>
 {baseline_table}
 <figure><img src="{images['baseline']}" alt="Baseline ROC and precision-recall curves"><figcaption>Validation ROC and precision-recall curves for the five baseline models.</figcaption></figure>
 <h3>Baseline interpretation</h3><ul><li><strong>Decision Tree:</strong> interpretable but strongly overfit, with only 0.2116 validation failure recall.</li><li><strong>Random Forest:</strong> high precision (0.9091) and PR-AUC (0.8187), but a conservative 0.50 threshold limited recall to 0.1641.</li><li><strong>Gradient Boosting:</strong> improved recall to 0.5308 but trailed the leading probability-ranking models.</li><li><strong>XGBoost:</strong> strongest overall baseline with 0.6965 recall, 0.8117 precision, and 0.8707 PR-AUC.</li><li><strong>Artificial Neural Network:</strong> second-highest fixed-threshold recall at 0.5373, satisfying the neural-network comparison while trailing XGBoost in PR-AUC.</li></ul>
 
-<h2 id="tuning">6. Hyperparameter Tuning and Model Selection</h2>
+<h2 id="tuning">10. Hyperparameter Tuning</h2>
 <p>XGBoost and Random Forest were tuned using eight configurations each over three expanding chronological folds within the training period. The winning configurations were refitted on all training data. Each threshold was chosen on validation data by maximizing F2, which weights recall twice as strongly as precision.</p>
 <p><strong>Candidate rationale:</strong> XGBoost led the recall-first baseline comparison. Random Forest was retained because its strong baseline PR-AUC showed useful ranking performance that a lower threshold could convert into substantially higher recall. Search dimensions covered tree count and depth, learning rate, sampling, feature sampling, minimum child/leaf constraints, and regularization as appropriate to each model.</p>
 {tuned_table}
 <figure><img src="{images['tuning']}" alt="Tuned validation confusion matrices"><figcaption>Tuned validation confusion matrices at the selected model-specific thresholds.</figcaption></figure>
-<p>Threshold adjustment raised tuned XGBoost validation recall to 0.9122 and Random Forest recall to 0.7801. XGBoost was selected because it retained the stronger recall, F2, PR-AUC, and ROC-AUC combination. Its validation-derived threshold of {final['threshold']:.3f} was frozen before test evaluation.</p>
+<p>Threshold adjustment raised tuned XGBoost validation recall to 0.9122 and Random Forest recall to 0.7801.</p>
 
-<h2 id="performance">7. Final Model Performance</h2>
-<p>The selected configuration was refitted on combined training and validation data and evaluated once on the later test period.</p>
-<div class="metrics"><div class="metric"><strong>{final['recall']:.4f}</strong>Recall</div><div class="metric"><strong>{final['precision']:.4f}</strong>Precision</div><div class="metric"><strong>{final['f1']:.4f}</strong>F1</div><div class="metric"><strong>{final['pr_auc']:.4f}</strong>PR-AUC</div><div class="metric"><strong>{final['roc_auc']:.4f}</strong>ROC-AUC</div></div>
-<figure><img src="{images['test_confusion']}" alt="Final test confusion matrix"><figcaption>The final model correctly detected 1,069 failure records, missed 186, and produced 679 false-positive records.</figcaption></figure>
-<figure><img src="{images['test_curves']}" alt="Final test ROC and precision-recall curves"><figcaption>Threshold-independent discrimination on the untouched test period.</figcaption></figure>
-<div class="callout"><strong>Operational view:</strong> The classifier detected {int(operational['detected_episodes'])} of {int(operational['failure_episodes'])} failure episodes ({operational['episode_recall']:.2%}). It produced {operational['false_positive_records_per_turbine_day']:.2f} false-positive 10-minute records per turbine-day before alert deduplication or cooldown rules.</div>
-<p><strong>Performance interpretation:</strong> The final model missed 186 of 1,255 failure records while correctly identifying 1,069. Precision of 0.6116 means roughly three in five positive records corresponded to labeled failures. This is consistent with the deliberate recall-first objective, but the alert stream requires aggregation before operational use.</p>
+<h2 id="selection">11. Final Model Selection</h2>
+<p>XGBoost was selected because it retained the stronger recall, F2, PR-AUC, and ROC-AUC combination. Its validation-derived threshold of {final['threshold']:.3f} was frozen before test evaluation.</p>
 
-<h2 id="importance">8. Important Features Used by the Best Model</h2>
+<h2 id="importance">12. Feature Importance</h2>
 <p>Gain-based XGBoost importance is presented in two complementary views. The detailed view shows the actual original and engineered model inputs. The grouped view combines derived variants with their underlying physical sensor family, which is more suitable for business interpretation.</p>
 <figure><img src="{images['importance']}" alt="Detailed feature importance"><figcaption>Top model inputs, including original and engineered predictors.</figcaption></figure>
 {importance_table}
@@ -258,13 +273,24 @@ figure {{margin:25px 0}} figure img {{max-width:100%;display:block;margin:auto}}
 <figure><img src="{images['families']}" alt="Sensor-family importance"><figcaption>Importance aggregated by physical source-sensor family.</figcaption></figure>
 <p>Drivetrain vibration contributed {families.iloc[0]['importance']:.2%} of fitted importance after grouping current, lagged, rolling, and normalized variants. Tower vibration and FFT vibration signals followed. Correlated features may divide or concentrate gain importance, so these values explain this fitted model rather than proving causal fault mechanisms.</p>
 
-<h2 id="recommendations">9. Actionable Insights and Recommendations</h2>
+<h2 id="performance">13. Final Model Test Performance</h2>
+<p>The selected configuration was refitted on combined training and validation data and evaluated once on the later test period.</p>
+<div class="metrics"><div class="metric"><strong>{final['recall']:.4f}</strong>Recall</div><div class="metric"><strong>{final['precision']:.4f}</strong>Precision</div><div class="metric"><strong>{final['f1']:.4f}</strong>F1</div><div class="metric"><strong>{final['pr_auc']:.4f}</strong>PR-AUC</div><div class="metric"><strong>{final['roc_auc']:.4f}</strong>ROC-AUC</div></div>
+<figure><img src="{images['test_confusion']}" alt="Final test confusion matrix"><figcaption>The final model correctly detected 1,069 failure records, missed 186, and produced 679 false-positive records.</figcaption></figure>
+<figure><img src="{images['test_curves']}" alt="Final test ROC and precision-recall curves"><figcaption>Threshold-independent discrimination on the untouched test period.</figcaption></figure>
+<div class="callout"><strong>Operational view:</strong> The classifier detected {int(operational['detected_episodes'])} of {int(operational['failure_episodes'])} failure episodes ({operational['episode_recall']:.2%}). It produced {operational['false_positive_records_per_turbine_day']:.2f} false-positive 10-minute records per turbine-day before alert deduplication or cooldown rules.</div>
+<p><strong>Performance interpretation:</strong> The final model missed 186 of 1,255 failure records while correctly identifying 1,069. Precision of 0.6116 means roughly three in five positive records corresponded to labeled failures. This is consistent with the deliberate recall-first objective, but the alert stream requires aggregation before operational use.</p>
+
+<h2 id="recommendations">14. Business Insights and Recommendations</h2>
+<h3>Business Insights</h3>
+<ul><li>The final model detected 85.18% of failure records and 60 of 65 failure episodes in the later test period.</li><li>Sustained drivetrain vibration was the dominant model signal, with tower and FFT vibration providing supporting information.</li><li>The recall-first threshold improves detection at the cost of additional false-positive records that must be aggregated into operational alert episodes.</li></ul>
+<h3>Recommendations</h3>
 <ol><li><strong>Prioritize sustained vibration:</strong> route persistent drivetrain-vibration elevations and supporting tower/FFT patterns to analyst review.</li><li><strong>Deploy as decision support:</strong> use scores to prioritize inspections; do not trigger autonomous shutdown or maintenance without qualified review.</li><li><strong>Control alert burden:</strong> convert consecutive positive records into one alert episode and apply a documented cooldown. Validate whether the observed false-positive burden fits maintenance capacity.</li><li><strong>Investigate missed episodes:</strong> review the five undetected test episodes by turbine, duration, operating state, and sensor availability.</li><li><strong>Monitor drift:</strong> track failure prevalence, feature distributions, recall, precision, and alert volume by turbine and calendar period.</li><li><strong>Validate prospectively:</strong> conduct a shadow deployment before operational use and retrain only after appropriately labeled recent data are available.</li></ol>
 
-<h2 id="limitations">10. Limitations and Responsible Use</h2>
+<h2 id="limitations">15. Limitations and Responsible Use</h2>
 <ul><li>The dataset represents 15 turbines and approximately two months, limiting seasonal and fleet-wide generalization.</li><li>The label supports detection of current fault conditions; it does not demonstrate hours- or days-ahead failure forecasting.</li><li>Failure prevalence rises materially between training and later periods.</li><li>Episode recall counts an episode as detected if any constituent record is positive and does not itself measure advance warning.</li><li>False-positive records are not equivalent to work orders until an alert aggregation policy is defined.</li><li>Feature importance is model-specific and associative, not causal.</li></ul>
 
-<h2 id="rubric">11. Rubric Coverage</h2>
+<h2 id="rubric">16. Rubric Coverage</h2>
 <table class="report-table rubric"><thead><tr><th>Requirement</th><th>Evidence included</th><th>Status</th></tr></thead><tbody>
 <tr><td>Exploratory Data Analysis — 10 points</td><td>Problem definition, data overview, univariate, bivariate, multivariate analysis, four-panel EDA visualization, and meaningful observations.</td><td class="check">Covered</td></tr>
 <tr><td>Data Preprocessing — 7 points</td><td>Missing detection/treatment rationale, feature engineering rationale, chronological split, imbalance policy, and leakage controls.</td><td class="check">Covered</td></tr>
@@ -275,7 +301,7 @@ figure {{margin:25px 0}} figure img {{max-width:100%;display:block;margin:auto}}
 <tr><td>Overall Quality — 4 points</td><td>Executive-first structure, concise tables, embedded visuals, navigation, consistent terminology, and standalone HTML.</td><td class="check">Covered</td></tr>
 </tbody></table>
 
-<h2 id="conclusion">12. Conclusion</h2>
+<h2 id="conclusion">17. Conclusion</h2>
 <p>The final XGBoost pipeline provides strong discrimination and detects 85.18% of failure records and 92.31% of failure episodes in the later test period. Sustained drivetrain-vibration behavior is the dominant signal family. The results support a promising analyst-triage proof of concept, subject to prospective validation, alert aggregation, ongoing drift monitoring, and qualified human review.</p>
 <footer><strong>Project repository:</strong> <a href="https://github.com/Namees-aLbayati/wind-turbine-failure-detection" target="_blank" rel="noopener noreferrer">github.com/Namees-aLbayati/wind-turbine-failure-detection</a><br>Generated programmatically from the project’s executed and saved analysis artifacts. No final metrics or model comparisons were manually recomputed in the reporting step. <a href="#top">Back to top ↑</a></footer>
 </main></body></html>"""
