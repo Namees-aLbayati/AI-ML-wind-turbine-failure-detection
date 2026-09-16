@@ -25,7 +25,7 @@ The model is a decision-support tool. It is not an autonomous turbine shutdown s
 
 ## Evaluation and Model Selection
 
-Failure-class recall is the primary model-selection metric:
+Failure-class recall expresses the detection objective; final pipeline selection uses validation PR-AUC, and the decision threshold maximizes validation F2:
 
 `Recall = True Positives / (True Positives + False Negatives)`
 
@@ -40,15 +40,15 @@ Evaluation will also include:
 - Confusion matrix
 - Classification report
 
-The final classification threshold will be selected using validation data and then frozen before the final test evaluation. The untouched test set will be used once to estimate final model performance.
+The final classification threshold will be selected using validation data and then frozen before the final test evaluation. The held-out-turbine test set estimates final performance. Earlier exploratory test exposure is disclosed; it is not fresh independent confirmation.
 
 ## Methodology
 
 1. Assess data structure and quality, then apply documented preprocessing.
 2. Conduct univariate, bivariate, and multivariate exploratory analysis.
-3. Create a leakage-aware, time-based train/validation/test split.
+3. Hold out complete turbines for testing and use later development observations for validation.
 4. Train baseline Decision Tree, Random Forest, Gradient Boosting, XGBoost, and Artificial Neural Network models.
-5. Tune the two strongest baseline candidates using validation results, with failure recall as the primary selection criterion.
+5. Tune the prespecified XGBoost and Random Forest candidates, then compare them with the selected Keras pipeline using validation PR-AUC, with F2 and recall as tie-breakers.
 6. Compare final candidates, select and freeze a decision threshold, and evaluate once on the test set.
 7. Analyze feature importance using methods appropriate to the selected model.
 8. Translate validated findings into business recommendations and clearly stated limitations.
@@ -104,10 +104,10 @@ macOS/Linux:
 source .venv/bin/activate
 ```
 
-Install the project dependencies after `requirements.txt` is added with the analysis workflow:
+Install the complete project dependencies, including TensorFlow for the Keras experiments:
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-neural.txt
 ```
 
 Launch Jupyter and open the primary notebook:
@@ -134,6 +134,31 @@ Run each notebook from top to bottom in numerical order. Every notebook must exe
 - Metrics, tuning results, and feature-importance tables: `reports/model_results/`
 - Executive report: `reports/Wind_Turbine_Failure_Detection_Report.md`
 
-## Project Status
+## Current workflow and execution order
 
-The business objective and planned methodology are defined. EDA and modeling findings will be added only after the workflow has been executed on the supplied dataset. No dataset results or model-performance claims are reported at this stage.
+The corrected grouped-split workflow includes five Keras experiments and selects the final
+pipeline from validation results. Install `requirements-neural.txt` and run:
+
+```bash
+python scripts/run_notebooks.py 03_preprocessing.ipynb 04_feature_engineering.ipynb 05_baseline_modeling.ipynb 05b_neural_networks.ipynb 06_hyperparameter_tuning.ipynb 07_final_model_evaluation.ipynb 08_final_reporting.ipynb
+python scripts/build_full_code_notebook.py
+```
+
+Notebooks 01 and 02 contain the initial data audit and EDA. Stage 03 exports the exact
+split metadata, fitted ANN preprocessor, arrays and integrity manifest. Stage 04 builds
+engineered inputs; stage 05 trains the five traditional baselines. Stage 05b compares
+five Keras architectures on the same stage-03 inputs and stops after validation.
+Stage 06 tunes two tree candidates and compares complete pipelines with the Keras
+candidate using identical validation source rows. Stage 07 evaluates the frozen
+checkpoint without refitting and produces model-family-independent artifacts.
+Stage 08 verifies fingerprints and rebuilds the standalone report and local site files.
+
+Tree pipelines use selected engineered inputs; Keras uses stage-03 transformed snapshot
+inputs. Cross-family results compare complete pipelines, not architecture alone. The
+old chronological-split results are superseded. Neither test outcomes nor the identity
+of a previously selected model determine the new selection. Earlier exploratory test
+exposure and repeated validation use are disclosed in the report.
+
+Generated model files live under `models/` and are git-ignored. The full-code notebook
+and HTML include stage 05b and shared implementation sources. Local site generation
+does not publish or deploy to a remote service.
