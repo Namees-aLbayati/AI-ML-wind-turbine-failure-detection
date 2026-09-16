@@ -2,6 +2,7 @@
 from pathlib import Path
 import nbformat as nb
 from nbconvert import HTMLExporter
+from bs4 import BeautifulSoup
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = ['01_data_understanding.ipynb','02_eda.ipynb','03_preprocessing.ipynb',
            '04_feature_engineering.ipynb','05_baseline_modeling.ipynb','05b_neural_networks.ipynb',
@@ -19,8 +20,18 @@ The corrected protocol holds out three complete turbines and uses later developm
 Recorded outputs were produced in the individual notebook kernels. This consolidated artifact preserves the original dependency order; it does not reorder feature-importance or evaluation cells.''')]
     for name in SOURCES:
         source = nb.read(ROOT/'notebooks'/name,4)
+        for index, cell in enumerate(source.cells):
+            if cell.cell_type == 'code' and cell.source.strip() and cell.execution_count is None:
+                raise RuntimeError(f'{name}: cell {index} has no recorded execution.')
         combined.cells.append(nb.v4.new_markdown_cell(f'---\n\nSource: `{name}`'))
         combined.cells.extend(source.cells)
+    report = BeautifulSoup((ROOT/'reports/Wind_Turbine_Failure_Detection_Report.html').read_text(), 'html.parser')
+    sections = report.select('main > section')
+    if len(sections) != 13:
+        raise RuntimeError('Executive report is missing expected sections.')
+    combined.cells.append(nb.v4.new_markdown_cell('# Executive Findings and Recommendations\n\nThe following rendered report includes the verified results, business recommendations, limitations, and conclusion.'))
+    for section in sections:
+        combined.cells.append(nb.v4.new_markdown_cell(str(section)))
     combined.cells.append(nb.v4.new_markdown_cell('# Shared Implementation Sources'))
     for path in ['src/modeling/neural_networks.py','src/modeling/artifacts.py','src/reporting/build_report.py']:
         combined.cells.append(nb.v4.new_markdown_cell(f'## `{path}`\n\n```python\n{(ROOT/path).read_text()}\n```'))

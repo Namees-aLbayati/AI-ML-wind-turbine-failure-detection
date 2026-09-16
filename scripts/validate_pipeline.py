@@ -5,6 +5,7 @@ import sys
 import nbformat
 import numpy as np
 import pandas as pd
+from bs4 import BeautifulSoup
 from sklearn.metrics import recall_score, precision_score, average_precision_score
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
@@ -32,7 +33,7 @@ def main():
     assert np.isclose(final.pr_auc,average_precision_score(predictions.failure,predictions.failure_probability))
     expected=(predictions.failure_probability>=selection['threshold']).astype(int)
     assert np.array_equal(expected,predictions.prediction)
-    for name in ['04_feature_engineering','05_baseline_modeling','06_hyperparameter_tuning','07_final_model_evaluation','08_final_reporting']:
+    for name in ['01_data_understanding','02_eda','03_preprocessing','04_feature_engineering','05_baseline_modeling','05b_neural_networks','06_hyperparameter_tuning','07_final_model_evaluation','08_final_reporting']:
         notebook=nbformat.read(ROOT/f'notebooks/{name}.ipynb',4)
         nbformat.validate(notebook)
         for cell in notebook.cells:
@@ -47,6 +48,16 @@ def main():
     assert f'{final.recall:.2%}' in report
     assert report.count('data:image/png;base64,')>=8
     assert report==(ROOT/'docs/index.html').read_text()==(ROOT/'index.html').read_text()
+    combined = nbformat.read(ROOT/'notebooks/AIML_Project_1_Full_Code_Notebook_Completed.ipynb', 4)
+    html = BeautifulSoup((ROOT/'reports/AIML_Project_1_Full_Code_Notebook_Completed.html').read_text(), 'html.parser')
+    assert len(html.select('div.jp-Cell')) == len(combined.cells)
+    for cell in combined.cells:
+        if cell.cell_type == 'code':
+            assert cell.execution_count is not None
+            assert not any(o.output_type == 'error' for o in cell.outputs)
+    assert len(html.select('section[id^="section-"]')) == 13
+    assert all(img.get('src', '').startswith('data:') for img in html.find_all('img'))
+    assert 'do not isolate optimizer effects' in html.get_text()
     print('Passed: split identity, model/result fingerprints, validation winner, frozen threshold, saved test metrics, executed notebooks, and report consistency.')
 
 if __name__=='__main__':
