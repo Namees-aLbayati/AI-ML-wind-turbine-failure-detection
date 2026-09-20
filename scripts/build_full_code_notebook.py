@@ -33,5 +33,8 @@ def main():
     exporter=HTMLExporter(); exporter.embed_images=True
     document,_=exporter.from_notebook_node(notebook)
     (ROOT/'reports/AIML_Project_1_Full_Code_Notebook_Completed.html').write_text(document)
+    site_document = document.replace('href="archive/', 'href="https://github.com/Namees-aLbayati/wind-turbine-failure-detection/blob/main/notebooks/archive/')
+    for destination in [ROOT/'index.html', ROOT/'docs/index.html']:
+        destination.write_text(site_document)
     print(f'Validated {len(expected)} analysis headings and exported executed notebook HTML.')
 if __name__=='__main__': main()

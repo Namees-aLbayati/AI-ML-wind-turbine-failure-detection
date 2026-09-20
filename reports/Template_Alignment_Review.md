@@ -9,6 +9,6 @@
 - Final validation-recall selection chose the tuned neural network at threshold 0.50. Test accuracy: 0.962735; recall: 0.996616; precision: 0.375398; F1: 0.545370. These replace prior results only in this revised submission.
 - Documented adaptations: existing grouped test/temporal validation partitions and 86 previously selected engineered inputs are reused. Raw-sensor imputation is demonstrated separately; actual model pipelines fit their own imputers on training data (inside each tuning fold). Previous test exposure and validation reuse remain disclosed.
 - Previous completed notebook preserved in `notebooks/archive/AIML_Project_1_Full_Code_Notebook_Pre_Template_Alignment.ipynb`.
-- Existing executive report/site remains the earlier workflow. Updated deliverables are the completed notebook and its matching HTML.
+- GitHub Pages entry points show the updated full notebook. The separate executive report remains the earlier workflow.
 
 Verification commands: `python scripts/align_template_notebook.py` (full execution); `python scripts/build_full_code_notebook.py` (heading/output validation and HTML export).
