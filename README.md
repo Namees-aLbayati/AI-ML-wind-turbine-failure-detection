@@ -1,6 +1,6 @@
 # Predictive Modeling with Machine Learning and Neural Networks: Wind Turbine Failure Detection
 
-**Latest completed notebook:** [View the GitHub Pages report](https://namees-albayati.github.io/wind-turbine-failure-detection/)
+**Latest completed notebook:** [View the GitHub Pages report](https://namees-albayati.github.io/AI-ML-wind-turbine-failure-detection/)
 
 ## Business Context
 
