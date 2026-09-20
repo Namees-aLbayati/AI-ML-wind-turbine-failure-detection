@@ -4,6 +4,7 @@ import copy
 import nbformat as nb
 from nbclient import NotebookClient
 from nbconvert import HTMLExporter
+from model_selection_narrative import add_model_selection_interpretation
 from submission_narrative import clean_submission
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE = ROOT / 'notebooks/reference/AIML_Project_1_Full_Code_Notebook.ipynb'
@@ -152,7 +153,7 @@ def tree_pipeline(model): return Pipeline([('imputer',SimpleImputer(strategy='me
     code[160]="model.compile(optimizer=keras.optimizers.Adam(.001), loss='binary_crossentropy', metrics=[keras.metrics.Recall(name='recall'),keras.metrics.Precision(name='precision'),keras.metrics.BinaryAccuracy(name='accuracy')])"
     code[162]="epochs = 30\nbatch_size = 128"
     code[163]="weights = compute_class_weight('balanced', classes=np.array([0,1]), y=y_train)\nclass_weight_dict = dict(enumerate(weights))\nsample_weights = np.array([class_weight_dict[int(v)] for v in y_train], dtype='float32')"
-    code[164]="start=time.time()\nhistory=model.fit(dataset(X_train_scaled,y_train.to_numpy(),batch_size,sample_weights,True),validation_data=dataset(X_valid_scaled,y_valid.to_numpy()),epochs=epochs,verbose=2,callbacks=[keras.callbacks.EarlyStopping(monitor='val_loss',patience=5,restore_best_weights=True)])\nend=time.time()"
+    code[164]="start=time.time()\nhistory=model.fit(dataset(X_train_scaled,y_train.to_numpy(),batch_size,sample_weights,True),validation_data=dataset(X_valid_scaled,y_valid.to_numpy()),epochs=epochs,verbose=2,shuffle=False,callbacks=[keras.callbacks.EarlyStopping(monitor='val_loss',patience=5,restore_best_weights=True)])\nend=time.time()"
     code[167]="evaluate('Neural Network',model,X_train_scaled,X_valid_scaled)\nmodel.save(output/'baseline_ann.keras')\npd.DataFrame(history.history).plot(subplots=True,figsize=(10,16)); plt.tight_layout(); plt.show()"
     notes[167]='Metrics are unweighted diagnostic measures; training loss uses class weights and validation loss does not. Early stopping restores the best validation-loss weights. The configured epoch cap satisfies the template, while actual epochs can be fewer.'
     code[171]="baseline_table = pd.DataFrame(records)\ndisplay(baseline_table.query(\"split == 'train'\").sort_values(['Recall','PR_AUC'],ascending=False))"
@@ -301,6 +302,8 @@ def main():
         nb.write(notebook,DEST)
     if any(o.output_type=='error' for c in notebook.cells if c.cell_type=='code' for o in c.outputs): raise RuntimeError('Execution error')
     finalize(notebook)
+    add_model_selection_interpretation(notebook)
+    nb.write(notebook,DEST)
     exporter=HTMLExporter(); exporter.embed_images=True
     document,_=exporter.from_notebook_node(notebook)
     (ROOT/'reports/AIML_Project_1_Full_Code_Notebook_Completed.html').write_text(document)

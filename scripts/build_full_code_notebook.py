@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import nbformat as nb
 from nbconvert import HTMLExporter
+from model_selection_narrative import add_model_selection_interpretation
 from submission_narrative import clean_submission, INSTRUCTION_HEADING
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -19,6 +20,7 @@ def main():
     notebook=nb.read(path,4)
     reference=nb.read(ROOT/'notebooks/reference/AIML_Project_1_Full_Code_Notebook.ipynb',4)
     notebook=clean_submission(notebook, reference)
+    notebook=add_model_selection_interpretation(notebook)
     expected=[h for h in headings(reference) if h != INSTRUCTION_HEADING]
     actual=headings(notebook)
     if actual[:len(expected)] != expected:
